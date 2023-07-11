@@ -33,7 +33,7 @@ if (GCC_VERSION GREATER 13)
       set(USE_OpenMP OFF)
     endif()
     set(CMAKE_C_COMPILER "/opt/homebrew/Cellar/gcc@12/12.3.0/bin/gcc-12")
-    set(CMAKE_CXX_COMPILER "/opt/homebrew/Cellar/gcc@12/12.3.0/bin/g++-12")
+    set(CMAKE_CXX_COMPILER "/opt/homebrew/Cellar/gcc@12/12.3.0/bin/gcc-12")
   else()
     set(CMAKE_CXX_COMPILER "/usr/bin/g++-12")  # Replace with the path to your GCC 13 executable
   endif()
@@ -44,10 +44,8 @@ if(APPLE AND USE_OpenMP)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
     set(OpenMP_CXX_FLAGS "-fopenmp")
-    set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
+    set(OpenMP_CXX_LIB_NAMES "libomp")
     set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-    set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
-    set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
   endif()
 endif()
 
@@ -59,11 +57,16 @@ endif()
 if (OPENMP_FOUND)
   # Print that we are using OpenMP
   message(STATUS "Using OpenMP for parallelization")
-  set(OPENMP_AVAILABLE 1)
+  set(HAVE_OPENMP 1)
+  
   # Enable OpenMP support for the target
   # target_link_libraries(neural-library PUBLIC OpenMP::OpenMP_CXX)
+  
   # Set OpenMP flags
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+
+  set(OpenMP_CXX_INCLUDE_DIRS "/opt/homebrew/Cellar/libomp/16.0.6/include")
+  target_include_directories(neural-library PUBLIC ${OpenMP_CXX_INCLUDE_DIRS})
 endif()
 
 

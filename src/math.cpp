@@ -53,6 +53,20 @@ void matrix_delete(Matrix *matrix) {
 void matrix_print(Matrix *matrix) {
   if (matrix == nullptr || matrix->elements == nullptr) return;
 
+#if HAVE_OPENMP
+  printf("Hello from thread\n");
+#pragma omp parallel
+  {
+    // Get the thread number, and the maximum number of threads which depends on
+    // the target architecture.
+    int threadNum = omp_get_thread_num();
+    int maxThreads = omp_get_max_threads();
+
+    // Simple message to stdout
+    printf("Hello from thread %i of %i!\n", threadNum, maxThreads);
+  }
+#endif
+
   for (int i = 0; i < matrix->rows; i++) {
     for (int j = 0; j < matrix->cols; j++) {
       printf("%f ", matrix->elements[i * matrix->cols + j]);
@@ -154,13 +168,15 @@ Matrix *matrix_dot(Matrix *matrix1, Matrix *matrix2) {
 
   Matrix *matrix = matrix_create(matrix1->rows, matrix2->cols);
 
+#if HAVE_OPENMP
+#pragma omp parallel for
+#endif
   for (int i = 0; i < matrix1->rows; i++)
     for (int j = 0; j < matrix2->cols; j++)
       for (int k = 0; k < matrix1->cols; k++)
         matrix->elements[i * matrix2->cols + j] +=
             matrix1->elements[i * matrix1->cols + k] *
             matrix2->elements[k * matrix2->cols + j];
-
   return matrix;
 }
 

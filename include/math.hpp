@@ -13,12 +13,8 @@
 #ifndef MATH_HPP_
 #define MATH_HPP_
 
-// #ifdef OPENMP_AVAILABLE
-// #ifdef __APPLE__
-#include "/opt/homebrew/Cellar/libomp/16.0.6/include/omp.h"
-// #else
-// #include <omp.h>
-// #endif`
+// #if HAVE_OPENMP
+#include <omp.h>
 // #endif
 #include <stdio.h>
 
