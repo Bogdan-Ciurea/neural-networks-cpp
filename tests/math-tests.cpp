@@ -24,8 +24,14 @@ class MathTests : public ::testing::Test {
 
 TEST(MathTests, CreateMatrix) {
   custom_math::Matrix *matrix = custom_math::matrix_create(2, 2);
+  
   EXPECT_EQ(matrix->rows, 2);
   EXPECT_EQ(matrix->cols, 2);
+  EXPECT_EQ(matrix->elements[0], 0);
+  EXPECT_EQ(matrix->elements[1], 0);
+  EXPECT_EQ(matrix->elements[2], 0);
+  EXPECT_EQ(matrix->elements[3], 0);
+  
   custom_math::matrix_delete(matrix);
 }
 

@@ -57,16 +57,32 @@ endif()
 if (OPENMP_FOUND)
   # Print that we are using OpenMP
   message(STATUS "Using OpenMP for parallelization")
-  set(HAVE_OPENMP 1)
-  
-  # Enable OpenMP support for the target
-  # target_link_libraries(neural-library PUBLIC OpenMP::OpenMP_CXX)
-  
-  # Set OpenMP flags
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
-  set(OpenMP_CXX_INCLUDE_DIRS "/opt/homebrew/Cellar/libomp/16.0.6/include")
-  target_include_directories(neural-library PUBLIC ${OpenMP_CXX_INCLUDE_DIRS})
+  if (APPLE)
+    # Check if the path to OpenMP is correct
+    if (NOT EXISTS "/opt/homebrew/Cellar/libomp/12.0.1/include/omp.h")
+      message(FATAL_ERROR "The path to OpenMP is incorrect. Please install OpenMP with Homebrew.")
+      set(USE_OpenMP OFF)
+    else ()
+      # Set OpenMP flags
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+
+      set(OpenMP_CXX_INCLUDE_DIRS "/opt/homebrew/Cellar/libomp/16.0.6/include")
+      target_include_directories(neural-library PUBLIC ${OpenMP_CXX_INCLUDE_DIRS})
+    endif()
+
+  elseif(UNIX)
+    # Enable OpenMP support for the target
+    target_link_libraries(neural-library PUBLIC OpenMP::OpenMP_CXX)
+  endif()
+  
+  # Add the OpenMP flag
+  if (USE_OpenMP)
+    add_definitions(-DUSE_OPENMP="can use openmp")
+  endif()
+  
+else()
+  message(STATUS "Not using OpenMP for parallelization")
 endif()
 
 

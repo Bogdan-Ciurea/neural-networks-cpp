@@ -13,15 +13,19 @@
 #ifndef MATH_HPP_
 #define MATH_HPP_
 
-// #if HAVE_OPENMP
-#include <omp.h>
-// #endif
+#ifdef USE_OPENMP
+  #define HAVE_OPENMP true
+  #include <omp.h>
+#else
+  #define HAVE_OPENMP false
+#endif
 #include <stdio.h>
+#include <stdlib.h>
 
 namespace custom_math {
 
 typedef struct {
-  int rows, cols;
+  size_t rows, cols;
   double *elements;
 } Matrix;
 
@@ -30,10 +34,12 @@ typedef struct {
  *
  * @param rows The number of rows of the matrix.
  * @param cols The number of columns of the matrix.
+ * @param value The value of each element of the matrix.
  *
  * @return Matrix* The matrix that was created.
  */
-Matrix *matrix_create(int rows, int cols);
+Matrix *matrix_create(const int rows,const  int cols, const double value = 0.0);
+
 
 /**
  * @brief This function is used to create an identity matrix.
@@ -41,7 +47,7 @@ Matrix *matrix_create(int rows, int cols);
  * @param size     The size of the matrix.
  * @return Matrix* The identity matrix.
  */
-Matrix *matrix_I(int size);
+Matrix *matrix_I(const int size);
 
 /**
  * @brief This function is used to delete a matrix.
@@ -55,7 +61,7 @@ void matrix_delete(Matrix *matrix);
  *
  * @param matrix* The matrix that will be printed.
  */
-void matrix_print(Matrix *matrix);
+void matrix_print(const Matrix *matrix);
 
 /**
  * @brief This function is used to copy a matrix.
@@ -63,7 +69,7 @@ void matrix_print(Matrix *matrix);
  * @param matrix*   The matrix that will be copied.
  * @return Matrix* The copy of the matrix.
  */
-Matrix *matrix_copy(Matrix *matrix);
+Matrix *matrix_copy(const Matrix *matrix);
 
 void matrix_save(Matrix *matrix, const char *filename);
 
