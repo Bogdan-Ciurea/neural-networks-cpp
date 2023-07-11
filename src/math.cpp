@@ -30,14 +30,15 @@ Matrix *matrix_create(const int rows, const int cols, const double value) {
     matrix = nullptr;
   }
 
-  // Initialize the matrix with the given value.
-  #ifndef __APPLE__ AND value == 0 // Apparently, Apple M1 will initialize the matrix with 0.
-    int i;
-    #ifdef USE_OPENMP
-    #pragma omp parallel for private(i)
-    #endif
-    for (i = 0; i < rows * cols; i++) matrix->elements[i] = value;
-  #endif
+// Initialize the matrix with the given value.
+#ifndef __APPLE__ AND value == \
+    0  // Apparently, Apple M1 will initialize the matrix with 0.
+  int i;
+#ifdef USE_OPENMP
+#pragma omp parallel for private(i)
+#endif
+  for (i = 0; i < rows * cols; i++) matrix->elements[i] = value;
+#endif
 
   return matrix;
 }
@@ -46,9 +47,9 @@ Matrix *matrix_I(const int size) {
   Matrix *matrix = matrix_create(size, size);
   int i, j;
 
-  #ifdef USE_OPENMP
-  #pragma omp parallel for private(i, j)
-  #endif
+#ifdef USE_OPENMP
+#pragma omp parallel for private(i, j)
+#endif
   for (i = 0; i < size; i++)
     for (j = 0; j < size; j++)
       matrix->elements[i * size + j] = (i == j) ? 1. : 0.;
@@ -82,9 +83,9 @@ Matrix *matrix_copy(const Matrix *matrix) {
   Matrix *new_matrix = matrix_create(matrix->rows, matrix->cols);
   int i, j;
 
-  #ifdef USE_OPENMP
-  #pragma omp parallel for private(i, j) shared(matrix, new_matrix)
-  #endif
+#ifdef USE_OPENMP
+#pragma omp parallel for private(i, j) shared(matrix, new_matrix)
+#endif
   for (i = 0; i < matrix->rows; i++)
     for (j = 0; j < matrix->cols; j++)
       new_matrix->elements[i * matrix->cols + j] =
@@ -138,9 +139,9 @@ Matrix *matrix_add(Matrix *matrix1, Matrix *matrix2) {
   Matrix *matrix = matrix_create(matrix1->rows, matrix1->cols);
   int i, j;
 
-  #if HAVE_OPENMP
-  #pragma omp parallel for private(i, j) shared(matrix1, matrix2, matrix)
-  #endif
+#if HAVE_OPENMP
+#pragma omp parallel for private(i, j) shared(matrix1, matrix2, matrix)
+#endif
   for (i = 0; i < matrix1->rows; i++)
     for (j = 0; j < matrix1->cols; j++)
       matrix->elements[i * matrix1->cols + j] =
@@ -160,9 +161,9 @@ Matrix *matrix_sub(Matrix *matrix1, Matrix *matrix2) {
   Matrix *matrix = matrix_create(matrix1->rows, matrix1->cols);
   int i, j;
 
-  #if HAVE_OPENMP
-  #pragma omp parallel for private(i, j) shared(matrix1, matrix2, matrix)
-  #endif
+#if HAVE_OPENMP
+#pragma omp parallel for private(i, j) shared(matrix1, matrix2, matrix)
+#endif
   for (i = 0; i < matrix1->rows; i++)
     for (j = 0; j < matrix1->cols; j++)
       matrix->elements[i * matrix1->cols + j] =
@@ -180,18 +181,25 @@ Matrix *matrix_dot(Matrix *matrix1, Matrix *matrix2) {
   if (matrix1->cols != matrix2->rows) return nullptr;
 
   Matrix *matrix = matrix_create(matrix1->rows, matrix2->cols);
-  int i, j, k;
-  
-  #if HAVE_OPENMP
-  #pragma omp parallel for private(i, j, k) shared(matrix1, matrix2, matrix)
-  #endif
+  Matrix *matrix2_t = matrix_transpose(matrix2);
+
+  int i, j, k, dot;
+
+#if HAVE_OPENMP
+#pragma omp parallel for private(i, j, k, dot) \
+    shared(matrix1, matrix2_t, matrix)
+#endif
   for (i = 0; i < matrix1->rows; i++)
-    for (j = 0; j < matrix2->cols; j++)
+    for (j = 0; j < matrix2_t->rows; j++) {
+      dot = 0;
       for (k = 0; k < matrix1->cols; k++)
-        matrix->elements[i * matrix2->cols + j] +=
-            matrix1->elements[i * matrix1->cols + k] *
-            matrix2->elements[k * matrix2->cols + j];
-            
+        dot += matrix1->elements[i * matrix1->cols + k] *
+               matrix2_t->elements[j * matrix2_t->cols + k];
+      matrix->elements[i * matrix->cols + j] = dot;
+    }
+
+  matrix_delete(matrix2_t);
+
   return matrix;
 }
 
@@ -201,9 +209,9 @@ Matrix *matrix_mul_scalar(Matrix *matrix, double scalar) {
   Matrix *new_matrix = matrix_create(matrix->rows, matrix->cols);
   int i, j;
 
-  #ifdef USE_OPENMP
-  #pragma omp parallel for private(i, j) shared(matrix, new_matrix)
-  #endif
+#ifdef USE_OPENMP
+#pragma omp parallel for private(i, j) shared(matrix, new_matrix)
+#endif
   for (i = 0; i < matrix->rows; i++)
     for (j = 0; j < matrix->cols; j++)
       new_matrix->elements[i * matrix->cols + j] =
@@ -219,9 +227,9 @@ Matrix *matrix_transpose(Matrix *matrix) {
 
   int i, j;
 
-  #ifdef USE_OPENMP
-  #pragma omp parallel for private(i, j) shared(matrix, new_matrix)
-  #endif
+#ifdef USE_OPENMP
+#pragma omp parallel for private(i, j) shared(matrix, new_matrix)
+#endif
   for (i = 0; i < matrix->rows; i++)
     for (j = 0; j < matrix->cols; j++)
       new_matrix->elements[j * matrix->rows + i] =
@@ -236,9 +244,9 @@ Matrix *matrix_minor(Matrix *matrix, int row, int col) {
   int new_row = 0, new_col = 0;
   int i, j;
 
-  #ifdef USE_OPENMP
-  #pragma omp parallel for private(i, j) shared(matrix, new_matrix)
-  #endif
+#ifdef USE_OPENMP
+#pragma omp parallel for private(i, j) shared(matrix, new_matrix)
+#endif
   for (i = 0; i < matrix->rows; i++) {
     if (i == row) continue;
     for (j = 0; j < matrix->cols; j++) {
@@ -261,9 +269,9 @@ double matrix_determinant(Matrix *matrix) {
   int i;
   Matrix *minor;
 
-  #ifdef USE_OPENMP
-  #pragma omp parallel for private(i, minor) shared(matrix, determinant)
-  #endif
+#ifdef USE_OPENMP
+#pragma omp parallel for private(i, minor) shared(matrix, determinant)
+#endif
   for (i = 0; i < matrix->rows; i++) {
     minor = matrix_minor(matrix, 0, i);
     determinant +=
@@ -280,10 +288,10 @@ Matrix *matrix_apply(Matrix *matrix, double (*function)(double)) {
   Matrix *new_matrix = matrix_create(matrix->rows, matrix->cols);
 
   int i, j;
-  
-  #ifdef USE_OPENMP
-  #pragma omp parallel for private(i, j) shared(matrix, new_matrix)
-  #endif
+
+#ifdef USE_OPENMP
+#pragma omp parallel for private(i, j) shared(matrix, new_matrix)
+#endif
   for (i = 0; i < matrix->rows; i++)
     for (j = 0; j < matrix->cols; j++)
       new_matrix->elements[i * matrix->cols + j] =

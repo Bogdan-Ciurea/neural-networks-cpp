@@ -14,10 +14,10 @@
 #define MATH_HPP_
 
 #ifdef USE_OPENMP
-  #define HAVE_OPENMP true
-  #include <omp.h>
+#define HAVE_OPENMP true
+#include <omp.h>
 #else
-  #define HAVE_OPENMP false
+#define HAVE_OPENMP false
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,8 +38,7 @@ typedef struct {
  *
  * @return Matrix* The matrix that was created.
  */
-Matrix *matrix_create(const int rows,const  int cols, const double value = 0.0);
-
+Matrix *matrix_create(const int rows, const int cols, const double value = 0.0);
 
 /**
  * @brief This function is used to create an identity matrix.
