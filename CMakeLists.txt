@@ -1,6 +1,6 @@
-# Set the minimum version of CMake that can be used
-# To find the cmake version run
-# $ cmake --version
+# thanks to this website for the cmake example
+# https://cliutils.gitlab.io/modern-cmake/
+# https://gitlab.com/CLIUtils/modern-cmake/-/tree/master/examples/extended-project
 cmake_minimum_required(VERSION 3.14..3.26)
 
 project(neural-networks
