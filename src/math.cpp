@@ -17,16 +17,16 @@ namespace custom_math {
 Matrix *matrix_create(const int rows, const int cols, const double value) {
   if (rows <= 0 || cols <= 0) return nullptr;
 
-  Matrix *matrix = new Matrix;
+  Matrix *matrix = (Matrix *)malloc(sizeof(Matrix));
 
   if (matrix == nullptr) return nullptr;
 
   matrix->rows = rows;
   matrix->cols = cols;
-  matrix->elements = new double[rows * cols];
+  matrix->elements = (double *)malloc(rows * cols * sizeof(double));
 
   if (matrix->elements == nullptr) {
-    delete matrix;
+    free(matrix);
     matrix = nullptr;
   }
 
@@ -60,9 +60,9 @@ Matrix *matrix_I(const int size) {
 void matrix_delete(Matrix *matrix) {
   if (matrix == nullptr) return;
 
-  delete[] matrix->elements;
+  if (matrix->elements != nullptr) free(matrix->elements);
   matrix->elements = nullptr;
-  delete matrix;
+  if (matrix != nullptr) free(matrix);
   matrix = nullptr;
 }
 
@@ -71,7 +71,8 @@ void matrix_print(const Matrix *matrix) {
 
   for (int i = 0; i < matrix->rows; i++) {
     for (int j = 0; j < matrix->cols; j++) {
-      printf("%f ", matrix->elements[i * matrix->cols + j]);
+      // Print the number with 3 decimals.
+      printf("%.3f ", matrix->elements[i * matrix->cols + j]);
     }
     printf("\n");
   }

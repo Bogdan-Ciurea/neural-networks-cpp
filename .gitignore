@@ -1,6 +1,7 @@
 /build
 /.vscode
 valgrind-out.txt
+/data/*.csv
 
 # Prerequisites
 *.d

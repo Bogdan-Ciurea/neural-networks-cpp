@@ -14,6 +14,7 @@ SET(TEST_NAME test-${PROJECT_NAME})
 
 SET(TEST_SOURCES 
     math-tests.cpp
+    image-tests.cpp
 )
 
 # Add the test executable

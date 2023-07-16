@@ -1,12 +1,16 @@
 set(GLOB HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/*.h")
 
 SET(SOURCES 
-    math.cpp
+  math.cpp
+  image.cpp
 )
 
 add_library(neural-library ${SOURCES} ${HEADER_LIST})
 
 target_include_directories(neural-library PUBLIC ../include)
+
+# Copy the data folder to the build directory
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/../data DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/..)
 
 # Parallelization
 OPTION (USE_OpenMP "Use OpenMP to enamble <omp.h>" ON)
